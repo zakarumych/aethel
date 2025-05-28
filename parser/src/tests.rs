@@ -1,5 +1,5 @@
 mod tokenizer {
-    use crate::token::{Lit, LitNum, TokenTree};
+    use crate::token::{Lit, TokenTree};
 
     #[test]
     fn ident() {
@@ -156,6 +156,46 @@ mod tokenizer {
         match token {
             TokenTree::Lit(Lit::Num(literal)) => {
                 assert_eq!(literal.parse_float(), Some(0.012345));
+            }
+            _ => unreachable!(),
+        }
+    }
+
+    #[test]
+    fn boolean_true() {
+        let test_string = "true";
+
+        let stream = crate::token::parse(&test_string).expect("Failed to parse boolean");
+        let tokens = stream.into_iter().collect::<Vec<_>>();
+
+        assert_eq!(tokens.len(), 1);
+        let token = &tokens[0];
+
+        assert!(matches!(token, TokenTree::Lit(Lit::Bool(_))));
+
+        match token {
+            TokenTree::Lit(Lit::Bool(literal)) => {
+                assert!(literal.value());
+            }
+            _ => unreachable!(),
+        }
+    }
+
+    #[test]
+    fn boolean_false() {
+        let test_string = "false";
+
+        let stream = crate::token::parse(&test_string).expect("Failed to parse boolean");
+        let tokens = stream.into_iter().collect::<Vec<_>>();
+
+        assert_eq!(tokens.len(), 1);
+        let token = &tokens[0];
+
+        assert!(matches!(token, TokenTree::Lit(Lit::Bool(_))));
+
+        match token {
+            TokenTree::Lit(Lit::Bool(literal)) => {
+                assert!(!literal.value());
             }
             _ => unreachable!(),
         }

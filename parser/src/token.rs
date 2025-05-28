@@ -225,11 +225,31 @@ pub struct LitStr {
     pub span: Span,
 }
 
+/// A string literal.
+/// A sequence of characters that starts with a double quote and ends with a double quote.
+/// Between the quotes, there may be a sequence of characters or escape sequences.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct LitBool {
+    pub literal: SmolStr,
+    pub span: Span,
+}
+
+impl LitBool {
+    pub fn value(&self) -> bool {
+        match self.literal.as_str() {
+            "true" => true,
+            "false" => false,
+            _ => unreachable!("LitBool should only contain 'true' or 'false'"),
+        }
+    }
+}
+
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Lit {
     Num(LitNum),
     Char(LitChar),
     Str(LitStr),
+    Bool(LitBool),
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -512,6 +532,12 @@ fn parse_impl(mut cursor: Cursor) -> Result<TokenStream, LexError> {
             continue;
         }
 
+        if let Some((lit_bool, next)) = parse_bool(cursor)? {
+            cursor = next;
+            trees.push(TokenTree::Lit(Lit::Bool(lit_bool)));
+            continue;
+        }
+
         if let Some((punct, next)) = parse_punct(cursor)? {
             cursor = next;
             trees.push(TokenTree::Punct(punct));
@@ -736,6 +762,34 @@ fn parse_num(cursor: Cursor) -> PResult<LitNum> {
         },
         next,
     )))
+}
+
+fn parse_bool(cursor: Cursor) -> PResult<LitBool> {
+    if cursor.starts_with("true") {
+        let next = cursor.advance(4);
+
+        if next.starts_with_fn(is_ident_continue) {
+            return Ok(None);
+        }
+
+        let literal = SmolStr::new_static("true");
+        let span = Span::range(cursor.off, next.off);
+        return Ok(Some((LitBool { literal, span }, next)));
+    }
+
+    if cursor.starts_with("false") {
+        let next = cursor.advance(5);
+
+        if next.starts_with_fn(is_ident_continue) {
+            return Ok(None);
+        }
+
+        let literal = SmolStr::new_static("false");
+        let span = Span::range(cursor.off, next.off);
+        return Ok(Some((LitBool { literal, span }, next)));
+    }
+
+    Ok(None)
 }
 
 fn parse_punct(cursor: Cursor) -> PResult<Punct> {
