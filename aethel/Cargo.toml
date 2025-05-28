@@ -1,0 +1,7 @@
+[package]
+name = "aethel"
+version = "0.1.0"
+edition = "2024"
+
+description = "A lightweight expression language for readable scripting in consoles and visual programming environments"
+license = "MIT OR Apache-2.0"

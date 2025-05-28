@@ -1,0 +1,11 @@
+[package]
+name = "aethel_parser"
+version = "0.1.0"
+edition = "2024"
+
+[features]
+std = ["smol_str/std"]
+default = ["std"]
+
+[dependencies]
+smol_str = { version = "*", default-features = false }
