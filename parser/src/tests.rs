@@ -201,3 +201,18 @@ mod tokenizer {
         }
     }
 }
+
+mod span {
+    use crate::span::Span;
+
+    #[test]
+    fn merge() {
+        let a = Span::range(1, 5);
+        let b = Span::range(3, 10);
+
+        let merged = a.merge(&b);
+
+        assert_eq!(merged.start, 1);
+        assert_eq!(merged.end, 10);
+    }
+}

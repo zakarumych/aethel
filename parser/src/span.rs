@@ -32,7 +32,7 @@ impl Span {
 
     pub fn merge(self, other: &Span) -> Self {
         Self {
-            start: cmp::max(self.start, other.start),
+            start: cmp::min(self.start, other.start),
             end: cmp::max(self.end, other.end),
         }
     }
